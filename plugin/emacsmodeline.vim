@@ -118,6 +118,8 @@ function! ParseEmacsModeLine()
                 setlocal shiftwidth=0
                 setlocal softtabstop=-1
             endif
+            call <SID>SetVimNumberOption(modeline, 'c-basic-offset',     'softtabstop')
+            call <SID>SetVimNumberOption(modeline, 'c-basic-offset',     'shiftwidth')
 
             call <SID>SetVimToggleOption(modeline, 'buffer-read-only',   'readonly',     0)
             call <SID>SetVimToggleOption(modeline, 'indent-tabs-mode',   'expandtab',    1)
@@ -128,7 +130,6 @@ function! ParseEmacsModeLine()
             endif
 
             " Other emacs options seen in the wild include:
-            "  * c-basic-offset: something like tab-width.
             "  * c-file-style: no vim equivalent (?).
             "  * coding: text encoding.  Non-UTF-8 files are evil.
             "  * compile-command: probably equivalent to &makeprg.  However, vim will refuse to
