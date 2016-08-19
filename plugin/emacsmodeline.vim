@@ -150,20 +150,22 @@ function! ParseEmacsModeLine()
     endfor
 
     " Prepare to scan the last 3000 characters' worth of lines.
-    let lastline = line("$")
+    let trylastline = line("$")
     let bname = bufname("")
     let fsize = getfsize(bname)
     if fsize > 3000
-        let firstline = byte2line(fsize-3000)
+        let tryfirstline = byte2line(fsize-3000)
     else
-        let firstline = 1
+        let tryfirstline = 1
     endif
 
     " Find the last line in the file that has 'Local Variables:' in it,
     " to try and be reasonably sure we aren't hitting another use of
     " that string. Use the comments around that string to filter out
     " all but the option name and value, as emacs purportedly does.
-    let lines = range(lastline, firstline, -1)
+    let firstline=-1
+    let lastline=-1
+    let lines = range(trylastline, tryfirstline, -1)
     let pattern = '^\(.*\)[ \t]*Local [vV]ariables:[ \t]*\(.*\)$'
     for n in lines
         let line = getline(n)
@@ -178,13 +180,15 @@ function! ParseEmacsModeLine()
     endfor
 
     " Now actually parse the lines we've found.
-    let lines = range(firstline, lastline)
-    for n in lines
-        let modeline = getline(n)
-        let modeline = substitute(modeline, '^'.cstart, '', '')
-        let modeline = substitute(modeline, cend.'$', '', '')
-        call <SID>ParseEmacsOption(modeline)
-    endfor
+    if firstline != -1 && lastline > firstline
+        let lines = range(firstline, lastline)
+        for n in lines
+            let modeline = getline(n)
+            let modeline = substitute(modeline, '^'.cstart, '', '')
+            let modeline = substitute(modeline, cend.'$', '', '')
+            call <SID>ParseEmacsOption(modeline)
+        endfor
+    endif
 endfunc
 
 autocmd BufReadPost * :call ParseEmacsModeLine()
